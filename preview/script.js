@@ -242,7 +242,10 @@ function main() {
     ctx.save();
     ctx.clearRect(0,0,c.width,c.height); // device space; transform is identity here
 
-    particles.forEach(p=>p.update(delta-lastDelta));
+    // Clamp the frame time: a repeated timestamp (dt = 0) would divide by zero and blank the
+    // curtain, and a long pause (tab switch) would fling it.
+    const dt = Math.min(Math.max(delta - lastDelta, 8), 33);
+    particles.forEach(p=>p.update(dt));
     lastDelta = delta;
 
     if(CONFIG.randomSolve) shuffleArray(constraints)
