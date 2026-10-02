@@ -4,5 +4,4 @@ The Dialect Institute site: a hanging curtain of text with a few words hidden in
 
 Based on "Strings" by Liam Egan (https://codepen.io/shubniggurath/pen/ZYpjorm), MIT License — see LICENSE.txt.
 
-- `preview/` — staged version for testing before launch
-- `index.html` — live root
+- `index.html`, `script.js`, `style.css` — the site
