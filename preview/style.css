@@ -1,0 +1,16 @@
+body {
+  background: #EEE;
+  margin: 0;
+  overflow: hidden;
+}
+
+/* Pinned to the visible viewport so iOS Safari's toolbars can't push the curtain down. */
+#container {
+  position: fixed;
+  inset: 0;
+  touch-action: none;
+}
+
+canvas {
+  display: block;
+}
