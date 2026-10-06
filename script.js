@@ -24,9 +24,20 @@ const HIDDEN = [
   { word: 'relational', row: 0.83, col: 0.62 },
 ];
 
-// Hidden letters are drawn a touch darker than the field. ?tint=0 makes them identical.
+// Hidden letters match the field at rest and darken only while their threads move, so the
+// sentence surfaces when something passes through and fades as the curtain settles.
+// ?reveal=0 restores v1: hidden letters always a touch darker (?tint=0 makes them identical).
+const REVEAL = params.get('reveal') !== '0';
 const FIELD_COLOR = '#3a3a3a';
-const HIDDEN_COLOR = params.get('tint') === '0' ? FIELD_COLOR : '#141414';
+const HIDDEN_COLOR = REVEAL ? '#000' : params.get('tint') === '0' ? FIELD_COLOR : '#141414';
+// How much tilt (sin of thread angle) and speed (logical px/frame) count as fully revealed.
+const REVEAL_TILT = 0.25;
+const REVEAL_SPEED = 1.5;
+// Per-frame easing toward the target: quick to surface, slow (~2s) to fade.
+const REVEAL_RISE = 0.2;
+const REVEAL_FALL = 0.03;
+// While a word is revealed, the rest of the curtain fades back by up to this much.
+const REVEAL_DIM = 0.6;
 
 let fullCode = '';
 
@@ -147,7 +158,7 @@ function main() {
         const start = Math.round(h.col * (gridW - h.word.length));
         if (j === Math.round(h.row * (gridH - 1)) && i >= start && i < start + h.word.length) {
           char = h.word[i - start];
-          hidden = true;
+          hidden = h;
         }
       }
 
@@ -197,12 +208,36 @@ function main() {
     });
   }
 
+  // Each hidden word reveals as a whole, driven by its most disturbed letter, so it reads as a word.
+  function updateReveal() {
+    for (const h of HIDDEN) h.target = 0;
+    for (const p of particles) {
+      if (!p.hidden) continue;
+      let tilt = 0;
+      const constraint = p.downConstraint;
+      if (constraint) {
+        const dx = constraint.p2.pos.x - constraint.p1.pos.x;
+        const dy = constraint.p2.pos.y - constraint.p1.pos.y;
+        tilt = Math.abs(dx) / (Math.hypot(dx, dy) || 1);
+      }
+      const speed = p.pos.subtractNew(p.oldPos).length;
+      const target = Math.min(1, Math.max(tilt / REVEAL_TILT, speed / REVEAL_SPEED));
+      p.hidden.target = Math.max(p.hidden.target, target);
+    }
+    for (const h of HIDDEN) {
+      h.reveal = h.reveal || 0;
+      h.reveal += (h.target - h.reveal) * (h.target > h.reveal ? REVEAL_RISE : REVEAL_FALL);
+    }
+  }
+
   function drawCode() {
     const { offsetX, offsetY } = curtainOffset(c);   // logical px
+    if (REVEAL) updateReveal();
+    const fieldAlpha = REVEAL ? 1 - REVEAL_DIM * Math.max(...HIDDEN.map(h => h.reveal)) : 1;
 
     particles.forEach(p => {
       if (!p.char || p.char === ' ') return;
-      const img = (p.hidden ? hiddenCanvases : charCanvases)[p.char];
+      const img = (p.hidden && !REVEAL ? hiddenCanvases : charCanvases)[p.char];
       if (!img) return;
 
       let cos = 1, sin = 0;
@@ -222,7 +257,15 @@ function main() {
 
       const half = img.logicalSize / 2;
       // Explicit w/h downscales the hi-res atlas back to logical size.
+      if (!p.hidden) ctx.globalAlpha = fieldAlpha;
       ctx.drawImage(img, -half, -half, img.logicalSize, img.logicalSize);
+      ctx.globalAlpha = 1;
+      // Revealed letters: the darker glyph laid over the field glyph, by how disturbed the word is.
+      if (p.hidden && REVEAL && p.hidden.reveal > 0.01) {
+        ctx.globalAlpha = p.hidden.reveal;
+        ctx.drawImage(hiddenCanvases[p.char], -half, -half, img.logicalSize, img.logicalSize);
+        ctx.globalAlpha = 1;
+      }
     });
 
     ctx.setTransform(1, 0, 0, 1, 0, 0);
