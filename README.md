@@ -5,6 +5,7 @@ The Dialect Institute site: a hanging curtain of text with a few words hidden in
 Based on "Strings" by Liam Egan (https://codepen.io/shubniggurath/pen/ZYpjorm), MIT License — see LICENSE.txt.
 
 - `index.html`, `script.js`, `style.css` — the site
+- `/guilds/` — "Guilds", a scroll story in 12 beats: one cloud of scrambled text becomes a group whose overlap resolves a shared line (copy and pacing live in `BEATS` in `guilds/script.js`; `?clouds=4`, `?radius=`, `?scramble=` to tune)
 
 ## Handoff
 

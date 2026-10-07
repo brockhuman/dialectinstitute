@@ -1,0 +1,97 @@
+html, body {
+  margin: 0;
+  background: #EEE;
+}
+
+body {
+  color: #3a3a3a;
+  font: 15px/1.6 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+/* script.js sets the track's height from the beats' spans; it is the scroll distance. */
+.track {
+  position: relative;
+}
+
+.stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: hidden;
+}
+
+canvas {
+  display: block;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Captions use the bottom 30% of the stage; the clouds live in the top 70% (CLOUD_BOX). */
+.captions {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 30%;
+  box-sizing: border-box;
+  padding: 8px 16px 0;
+  display: grid;
+  grid-template-columns: min(400px, 100%);
+  justify-content: center;
+  align-content: start;
+  pointer-events: none;
+}
+
+.captions > * {
+  grid-area: 1 / 1;
+  margin: 0;
+  opacity: 0;
+  transition: opacity .6s ease;
+}
+
+.captions > .on {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Reduced motion: the final state drawn once, with all the copy in a column beneath it. */
+html.still .track {
+  height: auto;
+}
+
+html.still .stage {
+  position: static;
+  height: auto;
+  overflow: visible;
+}
+
+html.still canvas {
+  position: static;
+  height: 70vh;
+}
+
+html.still .captions {
+  position: static;
+  height: auto;
+  display: block;
+  padding: 0 16px 64px;
+}
+
+html.still .captions > * {
+  max-width: 400px;
+  margin: 0 auto 1.5em;
+  opacity: 1;
+  transition: none;
+  pointer-events: auto;
+}
