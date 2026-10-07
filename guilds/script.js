@@ -75,6 +75,10 @@ const RESOLVED_COLOR = '#000';
 const CONTAINER_COLOR = '#3a3a3a';
 
 const LINE = "what's possible together";
+// Scrambling draws its characters from the homepage curtain's text (WORDS_TEXT in
+// ../script.js), so the clouds are made of the same letters. Each person's WORDS still
+// surface in echoes.
+const FIELD_TEXT = `we would sit at diners and on front porches and meander from philosophy to religion to our interpersonal lives. we developed metaphors that became our own internal language, so unique that if someone was listening in it would be indecipherable to them what we were talking about. it felt like entering a field of resonance where we were chipping away at a block of marble in between us to try to reveal something that already existed. the metaphors would carry over into the next conversation, and the next would weave from those metaphors and concepts and experiences and books we were reading, until it became something completely unique to us. from that state of coherence we found conviction. from conviction we made art. every step was an overflow from the one before. the gardener does not produce the plant. the gardener curates the conditions: the soil, the water, the protection. you cannot control what grows. not the individuals but what forms between them, the life between us, something new with its own set of possibilities. you cannot shortcut the emergence. islands sharing an ocean floor, separate, distinctive, connected by what is beneath. three rings linked so that removing any one causes all three to fall apart. `;
 const WORDS = [
   ['what if', 'someday', 'I keep wondering', 'I want to build', 'maybe', 'not yet', "I can't stop thinking about"],
   ['why not', 'bigger than me', 'I noticed', "let's make", 'it could be'],
@@ -246,14 +250,14 @@ const LH = FONT * LINE_HEIGHT;
 
 // ---- Glyph atlases: each character pre-rendered once per color at device resolution ----
 
-const POOLS = WORDS.map(words => [...words.join('')].filter(ch => ch !== ' '));
+const ALL_POOL = [...FIELD_TEXT].filter(ch => ch !== ' ');
+const POOLS = WORDS.map(() => ALL_POOL);
 const LOOP_POOL = [...LOOP_FRAGMENTS.join('')].filter(ch => ch !== ' ');
-const ALL_POOL = POOLS.flat();
 const BOX = Math.ceil(FONT * 1.4); // logical px, glyph cell size
 
 function makeAtlas(color) {
   const atlas = {};
-  for (const ch of new Set([...ALL_POOL, ...LINE])) {
+  for (const ch of new Set([...ALL_POOL, ...WORDS.flat().join(''), ...LINE])) {
     if (ch === ' ') continue;
     const off = document.createElement('canvas');
     off.width = off.height = BOX * dpr;            // device-res backing store
